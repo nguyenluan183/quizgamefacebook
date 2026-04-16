@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Facebook Pro - Advanced Version</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+
+    <style>
+      :root {
+        --primary: #3b82f6;
+        --secondary: #06b6d4;
+        --success: #22c55e;
+        --danger: #ef4444;
+        --dark-bg: #0f172a;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Roboto, sans-serif;
+        background: radial-gradient(circle at top, #1e3a8a, #0f172a);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .container {
+        width: 95%;
+        max-width: 700px;
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Progress Bar */
+      .progress-container {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        margin-bottom: 25px;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        width: 0%;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        line-height: 1.4;
+      }
+
+      .answer-grid {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      button.ans-btn {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      button.ans-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--primary);
+        transform: translateY(-2px);
+      }
+
+      .correct {
+        background: var(--success) !important;
+        border-color: transparent !important;
+      }
+      .wrong {
+        background: var(--danger) !important;
+        border-color: transparent !important;
+      }
+
+      /* Review Section */
+      #result-screen {
+        display: none;
+        text-align: center;
+      }
+      .review-list {
+        text-align: left;
+        max-height: 300px;
+        overflow-y: auto;
+        margin: 20px 0;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+      }
+      .review-item {
+        padding: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9rem;
+      }
+      .review-item span {
+        display: block;
+        margin-top: 4px;
+      }
+      .text-success {
+        color: #4ade80;
+      }
+      .text-danger {
+        color: #f87171;
+      }
+
+      .action-btn {
+        background: linear-gradient(45deg, var(--primary), var(--secondary));
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container animate__animated animate__fadeIn">
+      <div id="quiz-screen">
+        <div class="progress-container">
+          <div id="bar" class="progress-bar"></div>
+        </div>
+        <h2 id="question">Đang tải câu hỏi...</h2>
+        <div id="answers" class="answer-grid"></div>
+      </div>
+
+      <div id="result-screen" class="animate__animated animate__zoomIn">
+        <h2 id="final-status">🎉 Chúc mừng!</h2>
+        <h3 id="score-text" style="font-size: 2rem">0/20</h3>
+        <p>Xem lại các câu trả lời sai bên dưới:</p>
+        <div id="review-area" class="review-list"></div>
+        <button class="action-btn" onclick="restartQuiz()">
+          Làm lại từ đầu
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const quizData = [
+        {
+          q: "72% SV dùng FB >3h/ngày phản ánh gì?",
+          a: [
+            "Quản lý thời gian chưa hiệu quả",
+            "Học tốt hơn",
+            "Giao tiếp tốt hơn",
+            "Tăng vận động",
+          ],
+          c: 0,
+        },
+        {
+          q: "Tin sai lệch lan nhanh do?",
+          a: [
+            "Tư duy tốt",
+            "Hiệu ứng đám đông",
+            "Nguồn chính thống",
+            "Học thuật",
+          ],
+          c: 1,
+        },
+        {
+          q: "So sánh trên Facebook gây gì?",
+          a: ["Tự tin", "Áp lực và tự ti", "Học tốt", "Sáng tạo"],
+          c: 1,
+        },
+        {
+          q: "Thức khuya dùng FB gây?",
+          a: ["Khỏe hơn", "Rối loạn giấc ngủ", "Tập trung", "Giao tiếp"],
+          c: 1,
+        },
+        {
+          q: "70% bị ảnh hưởng trend cho thấy?",
+          a: ["Dễ bị tác động", "Độc lập", "Không bị ảnh hưởng", "Chỉ học"],
+          c: 0,
+        },
+        {
+          q: "Cách dùng FB tích cực?",
+          a: ["Học tập", "Lướt cả ngày", "So sánh", "Tin hết"],
+          c: 0,
+        },
+        {
+          q: "Thông tin gây tranh cãi nên?",
+          a: ["Chia sẻ", "Theo số đông", "Kiểm chứng", "Bỏ qua"],
+          c: 2,
+        },
+        {
+          q: "Vai trò gia đình?",
+          a: ["Cấm", "Định hướng", "Không quan tâm", "Kiểm soát"],
+          c: 1,
+        },
+        {
+          q: "Ảnh hưởng tiêu cực học tập?",
+          a: ["Tập trung", "Mất tập trung", "Ghi nhớ", "Động lực"],
+          c: 1,
+        },
+        {
+          q: "Nguyên nhân bị ảnh hưởng?",
+          a: ["Thiếu kỹ năng lọc", "Không dùng", "Không bạn", "Không thích"],
+          c: 0,
+        },
+        {
+          q: "Sống ảo dẫn đến?",
+          a: ["Tự tin", "Mất cân bằng", "Kết nối", "Học tốt"],
+          c: 1,
+        },
+        {
+          q: "Biểu hiện nghiện FB?",
+          a: ["Kiểm tra liên tục", "Chỉ học", "Dùng đúng giờ", "Tắt thông báo"],
+          c: 0,
+        },
+        {
+          q: "Giải pháp lâu dài?",
+          a: ["Xóa", "Tư duy phản biện", "Giải trí", "Không kết bạn"],
+          c: 1,
+        },
+        {
+          q: "FB ảnh hưởng mạnh nhất?",
+          a: ["Nhận thức và hành vi", "Chiều cao", "Thể chất", "Giọng"],
+          c: 0,
+        },
+        {
+          q: "Tác động tích cực?",
+          a: ["Kết nối", "Áp lực", "Lãng phí", "Tin giả"],
+          c: 0,
+        },
+        {
+          q: "Tin giả lan nhanh vì?",
+          a: ["Cảm xúc", "Kiểm duyệt", "Học thuật", "Không ai xem"],
+          c: 0,
+        },
+        {
+          q: "Tránh sống ảo?",
+          a: ["Cân bằng", "Online cả ngày", "Theo trend", "Đăng nhiều"],
+          c: 0,
+        },
+        {
+          q: "So sánh gây?",
+          a: ["Tự tin", "Tự ti", "Niềm vui", "Học tốt"],
+          c: 1,
+        },
+        {
+          q: "Giải pháp bền vững?",
+          a: ["Xóa app", "Nhận thức", "Dùng đêm", "Chỉ bạn"],
+          c: 1,
+        },
+        {
+          q: "Mục tiêu dùng FB?",
+          a: ["Phát triển bản thân", "Like", "So sánh", "Tin trend"],
+          c: 0,
+        },
+      ];
+
+      let currentIdx = 0;
+      let score = 0;
+      let userHistory = []; // Lưu lại lịch sử chọn
+
+      // Âm thanh (Sử dụng link audio online mẫu)
+      const sndCorrect = new Audio(
+        "https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3",
+      );
+      const sndWrong = new Audio(
+        "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3",
+      );
+
+      function loadQuestion() {
+        const q = quizData[currentIdx];
+        const qEl = document.getElementById("question");
+        const ansContainer = document.getElementById("answers");
+
+        // Hiệu ứng đổi câu hỏi
+        qEl.className = "animate__animated animate__fadeInRight";
+        qEl.innerText = `Câu ${currentIdx + 1}: ${q.q}`;
+
+        ansContainer.innerHTML = "";
+        q.a.forEach((ans, index) => {
+          const btn = document.createElement("button");
+          btn.className = "ans-btn animate__animated animate__fadeInUp";
+          btn.style.animationDelay = `${index * 0.1}s`;
+          btn.innerText = ans;
+          btn.onclick = () => checkAnswer(btn, index);
+          ansContainer.appendChild(btn);
+        });
+
+        document.getElementById("bar").style.width =
+          (currentIdx / quizData.length) * 100 + "%";
+      }
+
+      function checkAnswer(btn, selectedIdx) {
+        const correctIdx = quizData[currentIdx].c;
+        const allBtns = document.querySelectorAll(".ans-btn");
+
+        // Disable all buttons
+        allBtns.forEach((b) => (b.disabled = true));
+
+        // Lưu lịch sử
+        userHistory.push({
+          q: quizData[currentIdx].q,
+          selected: quizData[currentIdx].a[selectedIdx],
+          correct: quizData[currentIdx].a[correctIdx],
+          isCorrect: selectedIdx === correctIdx,
+        });
+
+        if (selectedIdx === correctIdx) {
+          btn.classList.add("correct", "animate__animated", "animate__pulse");
+          sndCorrect.play();
+          score++;
+        } else {
+          btn.classList.add("wrong", "animate__animated", "animate__shakeX");
+          allBtns[correctIdx].classList.add("correct");
+          sndWrong.play();
+        }
+
+        setTimeout(() => {
+          currentIdx++;
+          if (currentIdx < quizData.length) {
+            loadQuestion();
+          } else {
+            showResult();
+          }
+        }, 1200);
+      }
+
+      function showResult() {
+        document.getElementById("quiz-screen").style.display = "none";
+        document.getElementById("result-screen").style.display = "block";
+        document.getElementById("bar").style.width = "100%";
+
+        document.getElementById("score-text").innerText =
+          `${score} / ${quizData.length}`;
+
+        const reviewArea = document.getElementById("review-area");
+        reviewArea.innerHTML = "";
+
+        userHistory.forEach((item, idx) => {
+          const div = document.createElement("div");
+          div.className = "review-item";
+          div.innerHTML = `
+            <strong>Câu ${idx + 1}: ${item.q}</strong>
+            <span class="${item.isCorrect ? "text-success" : "text-danger"}">
+              Bạn chọn: ${item.selected} ${item.isCorrect ? "✓" : "✗"}
+            </span>
+            ${!item.isCorrect ? `<span class="text-success">Đáp án đúng: ${item.correct}</span>` : ""}
+          `;
+          reviewArea.appendChild(div);
+        });
+      }
+
+      function restartQuiz() {
+        currentIdx = 0;
+        score = 0;
+        userHistory = [];
+        document.getElementById("quiz-screen").style.display = "block";
+        document.getElementById("result-screen").style.display = "none";
+        loadQuestion();
+      }
+
+      // Khởi chạy
+      window.onload = loadQuestion;
+    </script>
+  </body>
+</html>
