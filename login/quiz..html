@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quiz Facebook Pro</title>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #0f172a, #1e3a8a);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        width: 90%;
+        max-width: 650px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        text-align: center;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(45deg, #3b82f6, #06b6d4);
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      button:hover {
+        transform: scale(1.05);
+      }
+      .correct {
+        background: #22c55e !important;
+      }
+      .wrong {
+        background: #ef4444 !important;
+      }
+
+      .progress {
+        height: 10px;
+        background: #334155;
+        border-radius: 10px;
+        margin-bottom: 15px;
+      }
+      .progress-bar {
+        height: 100%;
+        background: #3b82f6;
+        width: 0%;
+        border-radius: 10px;
+        transition: 0.4s;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="progress"><div id="bar" class="progress-bar"></div></div>
+      <h2 id="question"></h2>
+      <div id="answers"></div>
+      <h3 id="score"></h3>
+    </div>
+
+    <script>
+      const quiz = [
+        {
+          q: "72% SV dùng FB >3h/ngày phản ánh gì?",
+          a: [
+            "Quản lý thời gian chưa hiệu quả",
+            "Học tốt hơn",
+            "Giao tiếp tốt hơn",
+            "Tăng vận động",
+          ],
+          c: 0,
+        },
+        {
+          q: "Tin sai lệch lan nhanh do?",
+          a: [
+            "Tư duy tốt",
+            "Hiệu ứng đám đông",
+            "Nguồn chính thống",
+            "Học thuật",
+          ],
+          c: 1,
+        },
+        {
+          q: "So sánh trên Facebook gây gì?",
+          a: ["Tự tin", "Áp lực và tự ti", "Học tốt", "Sáng tạo"],
+          c: 1,
+        },
+        {
+          q: "Thức khuya dùng FB gây?",
+          a: ["Khỏe hơn", "Rối loạn giấc ngủ", "Tập trung", "Giao tiếp"],
+          c: 1,
+        },
+        {
+          q: "70% bị ảnh hưởng trend cho thấy?",
+          a: ["Dễ bị tác động", "Độc lập", "Không bị ảnh hưởng", "Chỉ học"],
+          c: 0,
+        },
+
+        {
+          q: "Cách dùng FB tích cực?",
+          a: ["Học tập", "Lướt cả ngày", "So sánh", "Tin hết"],
+          c: 0,
+        },
+        {
+          q: "Thông tin gây tranh cãi nên?",
+          a: ["Chia sẻ", "Theo số đông", "Kiểm chứng", "Bỏ qua"],
+          c: 2,
+        },
+        {
+          q: "Vai trò gia đình?",
+          a: ["Cấm", "Định hướng", "Không quan tâm", "Kiểm soát"],
+          c: 1,
+        },
+        {
+          q: "Ảnh hưởng tiêu cực học tập?",
+          a: ["Tập trung", "Mất tập trung", "Ghi nhớ", "Động lực"],
+          c: 1,
+        },
+        {
+          q: "Nguyên nhân bị ảnh hưởng?",
+          a: ["Thiếu kỹ năng lọc", "Không dùng", "Không bạn", "Không thích"],
+          c: 0,
+        },
+
+        {
+          q: "Sống ảo dẫn đến?",
+          a: ["Tự tin", "Mất cân bằng", "Kết nối", "Học tốt"],
+          c: 1,
+        },
+        {
+          q: "Biểu hiện nghiện FB?",
+          a: ["Kiểm tra liên tục", "Chỉ học", "Dùng đúng giờ", "Tắt thông báo"],
+          c: 0,
+        },
+        {
+          q: "Giải pháp lâu dài?",
+          a: ["Xóa", "Tư duy phản biện", "Giải trí", "Không kết bạn"],
+          c: 1,
+        },
+        {
+          q: "FB ảnh hưởng mạnh nhất?",
+          a: ["Nhận thức và hành vi", "Chiều cao", "Thể chất", "Giọng"],
+          c: 0,
+        },
+        {
+          q: "Tác động tích cực?",
+          a: ["Kết nối", "Áp lực", "Lãng phí", "Tin giả"],
+          c: 0,
+        },
+
+        {
+          q: "Tin giả lan nhanh vì?",
+          a: ["Cảm xúc", "Kiểm duyệt", "Học thuật", "Không ai xem"],
+          c: 0,
+        },
+        {
+          q: "Tránh sống ảo?",
+          a: ["Cân bằng", "Online cả ngày", "Theo trend", "Đăng nhiều"],
+          c: 0,
+        },
+        {
+          q: "So sánh gây?",
+          a: ["Tự tin", "Tự ti", "Niềm vui", "Học tốt"],
+          c: 1,
+        },
+        {
+          q: "Giải pháp bền vững?",
+          a: ["Xóa app", "Nhận thức", "Dùng đêm", "Chỉ bạn"],
+          c: 1,
+        },
+        {
+          q: "Mục tiêu dùng FB?",
+          a: ["Phát triển bản thân", "Like", "So sánh", "Tin trend"],
+          c: 0,
+        },
+      ];
+
+      let i = 0,
+        score = 0;
+
+      function loadQ() {
+        let q = quiz[i];
+        document.getElementById("question").innerText = `Câu ${i + 1}: ` + q.q;
+
+        let html = "";
+        q.a.forEach((ans, index) => {
+          html += `<button onclick="check(this,${index})">${ans}</button>`;
+        });
+        document.getElementById("answers").innerHTML = html;
+
+        document.getElementById("bar").style.width =
+          (i / quiz.length) * 100 + "%";
+      }
+
+      function check(btn, ans) {
+        let correct = quiz[i].c;
+        let buttons = document.querySelectorAll("button");
+        buttons.forEach((b) => (b.disabled = true));
+
+        if (ans === correct) {
+          btn.classList.add("correct");
+          score++;
+        } else {
+          btn.classList.add("wrong");
+          buttons[correct].classList.add("correct");
+        }
+
+        setTimeout(() => {
+          i++;
+          if (i < quiz.length) loadQ();
+          else {
+            document.getElementById("question").innerText = "🎉 Hoàn thành!";
+            document.getElementById("answers").innerHTML = "";
+            document.getElementById("score").innerText =
+              "Điểm: " + score + "/" + quiz.length;
+          }
+        }, 1000);
+      }
+
+      loadQ();
+    </script>
+  </body>
+</html>
